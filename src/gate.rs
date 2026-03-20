@@ -9,6 +9,31 @@ pub enum Pauli {
     Z,
 }
 
+impl TryFrom<&str> for Pauli {
+    type Error = &'static str;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "I" => Ok(Pauli::I),
+            "X" => Ok(Pauli::X),
+            "Y" => Ok(Pauli::Y),
+            "Z" => Ok(Pauli::Z),
+            _ => Err("Invalid Pauli value"),
+        }
+    }
+}
+
+impl std::fmt::Display for Pauli {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Pauli::I => write!(f, "I"),
+            Pauli::X => write!(f, "X"),
+            Pauli::Y => write!(f, "Y"),
+            Pauli::Z => write!(f, "Z"),
+        }
+    }
+}
+
 // all gate types supported by .stim files
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -107,6 +132,17 @@ impl Default for Gate {
 }
 
 const NUM_GATES: usize = 70;
+
+impl From<Pauli> for Gate {
+    fn from(value: Pauli) -> Self {
+        match value {
+            Pauli::I => Gate::I,
+            Pauli::X => Gate::X,
+            Pauli::Y => Gate::Y,
+            Pauli::Z => Gate::Z,
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TargetType {

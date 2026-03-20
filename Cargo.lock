@@ -220,7 +220,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "stim-circuit"
+name = "stimcircuit"
 version = "0.1.0"
 dependencies = [
  "num",
