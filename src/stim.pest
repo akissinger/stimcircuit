@@ -1,0 +1,24 @@
+WHITESPACE = _{ (" " | "\t") }
+COMMENT = _{ "#" ~ (!"\n" ~ ANY)* }
+
+circuit = { SOI ~ line* ~ EOI }
+line = { (block | instruction | "") ~ NEWLINE }
+instruction = { ident ~ args? ~ targets }
+
+targets = { target* }
+target = { measurement_record | pauli_str | qubit }
+measurement_record = { "rec" ~ "[" ~ "-" ~ num ~ "]" }
+pauli_str = { negate? ~ pauli_num ~ ( "*" ~ pauli_num )* }
+qubit = { negate? ~ num }
+
+args = { "(" ~ arg ~ ("," ~ arg)* ~ ")" }
+arg = { decimal | num }
+
+block = { "REPEAT" ~ num ~ "{" ~ NEWLINE ~ body ~ "}" }
+body = { line* }
+
+ident = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHA | ASCII_DIGIT | "_")* }
+num = @{ ASCII_DIGIT+ }
+decimal = @{ "-"? ~ num ~ "." ~ num }
+pauli_num = @{ ("X" | "Y" | "Z") ~ num }
+negate = @{ "!" }
