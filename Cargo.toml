@@ -1,0 +1,10 @@
+[package]
+name = "stim-circuit"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+num = "0.4.3"
+pest = "2.8.6"
+pest_derive = "2.8.6"
+
