@@ -194,4 +194,80 @@ impl Circuit {
     pub fn instructions(&self) -> &[CircuitInstruction] {
         &self.instructions
     }
+
+    pub fn unrolled_instructions(&self) -> Vec<CircuitInstruction> {
+        let mut result = Vec::new();
+        for instruction in &self.instructions {
+            if instruction.gate() == Gate::REPEAT {
+                if let Some(block) = instruction.block() {
+                    for _ in 0..instruction.repeat_count() {
+                        result.extend(block.unrolled_instructions());
+                    }
+                }
+            } else {
+                result.push(instruction.clone());
+            }
+        }
+        result
+    }
+
+    pub fn unrolled(&self) -> Circuit {
+        Circuit {
+            instructions: self.unrolled_instructions(),
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_unroll() {
+        let mut circuit = Circuit::new();
+        let mut block = Circuit::new();
+        block.append(Gate::X, Box::new([Target::Qubit(0, false)]), Box::new([]));
+        block.append(Gate::Y, Box::new([Target::Qubit(1, false)]), Box::new([]));
+        circuit.append_repeat(3, block);
+        circuit.append(Gate::H, Box::new([Target::Qubit(0, false)]), Box::new([]));
+
+        let unrolled = circuit.unrolled();
+        assert_eq!(unrolled.len(), 7);
+        assert_eq!(unrolled.instructions()[0].gate(), Gate::X);
+        assert_eq!(unrolled.instructions()[1].gate(), Gate::Y);
+        assert_eq!(unrolled.instructions()[2].gate(), Gate::X);
+        assert_eq!(unrolled.instructions()[3].gate(), Gate::Y);
+        assert_eq!(unrolled.instructions()[4].gate(), Gate::X);
+        assert_eq!(unrolled.instructions()[5].gate(), Gate::Y);
+        assert_eq!(unrolled.instructions()[6].gate(), Gate::H);
+    }
+
+    #[test]
+    fn test_nested_unroll() {
+        let mut circuit = Circuit::new();
+        let mut block = Circuit::new();
+        block.append(Gate::X, Box::new([Target::Qubit(0, false)]), Box::new([]));
+        block.append(Gate::Y, Box::new([Target::Qubit(1, false)]), Box::new([]));
+        let mut nested_block = Circuit::new();
+        nested_block.append(Gate::Z, Box::new([Target::Qubit(2, false)]), Box::new([]));
+        block.append_repeat(2, nested_block);
+        circuit.append_repeat(3, block);
+        circuit.append(Gate::H, Box::new([Target::Qubit(0, false)]), Box::new([]));
+
+        let unrolled = circuit.unrolled();
+        assert_eq!(unrolled.len(), 13);
+        assert_eq!(unrolled.instructions()[0].gate(), Gate::X);
+        assert_eq!(unrolled.instructions()[1].gate(), Gate::Y);
+        assert_eq!(unrolled.instructions()[2].gate(), Gate::Z);
+        assert_eq!(unrolled.instructions()[3].gate(), Gate::Z);
+        assert_eq!(unrolled.instructions()[4].gate(), Gate::X);
+        assert_eq!(unrolled.instructions()[5].gate(), Gate::Y);
+        assert_eq!(unrolled.instructions()[6].gate(), Gate::Z);
+        assert_eq!(unrolled.instructions()[7].gate(), Gate::Z);
+        assert_eq!(unrolled.instructions()[8].gate(), Gate::X);
+        assert_eq!(unrolled.instructions()[9].gate(), Gate::Y);
+        assert_eq!(unrolled.instructions()[10].gate(), Gate::Z);
+        assert_eq!(unrolled.instructions()[11].gate(), Gate::Z);
+        assert_eq!(unrolled.instructions()[12].gate(), Gate::H);
+    }
 }
