@@ -1,8 +1,3 @@
-This Rust crate provides a simple parser for [stim](https://github.com/quantumlib/Stim) circuit files.
-
-Basic usage:
-
-```rust
 use stimcircuit::{parse_string, Arg, Circuit, Gate, ParseError, Target};
 
 fn main() {
@@ -39,5 +34,3 @@ fn main() {
 
     println!("Stim circuit parsed successfully.");
 }
-
-```
