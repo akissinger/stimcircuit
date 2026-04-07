@@ -123,6 +123,9 @@ pub enum Gate {
     MXX,
     MYY,
     MZZ,
+    // Non-Clifford gates
+    T,
+    T_DAG,
 }
 
 impl Default for Gate {
@@ -131,7 +134,7 @@ impl Default for Gate {
     }
 }
 
-const NUM_GATES: usize = 70;
+const NUM_GATES: usize = 72;
 
 impl From<Pauli> for Gate {
     fn from(value: Pauli) -> Self {
@@ -179,6 +182,7 @@ pub struct GateData {
     reset: bool,
     target_type: TargetType,
     unitary: bool,
+    clifford: bool,
 }
 
 const DEFAULT_DATA: GateData = GateData {
@@ -194,6 +198,7 @@ const DEFAULT_DATA: GateData = GateData {
     reset: false,
     target_type: TargetType::Empty,
     unitary: false,
+    clifford: true,
 };
 
 impl Default for GateData {
@@ -288,6 +293,8 @@ impl From<&str> for Gate {
             "MXX" => MXX,
             "MYY" => MYY,
             "MZZ" => MZZ,
+            "T" => T,
+            "T_DAG" => T_DAG,
             _ => NOT_A_GATE,
         }
     }
@@ -826,6 +833,22 @@ const GATE_DATA: [GateData; NUM_GATES] = [
         target_type: TargetType::Pair,
         ..DEFAULT_DATA
     },
+    GateData {
+        name: "T",
+        inverse: T_DAG,
+        target_type: TargetType::Single,
+        unitary: true,
+        clifford: false,
+        ..DEFAULT_DATA
+    },
+    GateData {
+        name: "T_DAG",
+        inverse: T,
+        target_type: TargetType::Single,
+        unitary: true,
+        clifford: false,
+        ..DEFAULT_DATA
+    },
 ];
 
 impl Gate {
@@ -834,6 +857,9 @@ impl Gate {
     }
     pub fn unitary(&self) -> bool {
         GATE_DATA[(*self) as usize].unitary
+    }
+    pub fn clifford(&self) -> bool {
+        GATE_DATA[(*self) as usize].clifford
     }
     pub fn noisy(&self) -> bool {
         GATE_DATA[(*self) as usize].noisy
@@ -932,5 +958,6 @@ mod test {
         assert_eq!(S.reset(), false);
         assert_eq!(S.target_type(), TargetType::Single);
         assert_eq!(S.unitary(), true);
+        assert_eq!(S.clifford(), true);
     }
 }
