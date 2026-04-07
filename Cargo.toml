@@ -1,5 +1,6 @@
 [package]
 name = "stimcircuit"
+description = "A Rust library for parsing quantum circuits in the Stim format."
 version = "0.1.0"
 edition = "2021"
 authors = ["Aleks Kissinger <aleks0@gmail.com>"]
@@ -9,6 +10,7 @@ homepage = "https://github.com/akissinger/stimcircuit"
 repository = "https://github.com/akissinger/stimcircuit"
 rust-version = "1.81"
 license = "Apache-2.0"
+readme = "README.md"
 
 [dependencies]
 num = "0.4.3"
